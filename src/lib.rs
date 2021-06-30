@@ -1,5 +1,4 @@
 use bytes::Bytes;
-use std::fmt::Display;
 
 pub struct ByteChunks<'a, T: 'a> {
     v: &'a [T],
