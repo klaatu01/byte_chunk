@@ -1,5 +1,4 @@
 use bytes::Bytes;
-use std::fmt::Display;
 
 pub struct ByteChunks<'a, T: 'a> {
     v: &'a [T],
@@ -26,7 +25,7 @@ impl<'a> SizeInBytes for &'a str {
 
 impl<'a, T: 'a> ByteChunks<'a, T>
 where
-    T: SizeInBytes + Display,
+    T: SizeInBytes,
 {
     pub fn new(slice: &'a [T], size: usize) -> Self {
         Self {
@@ -44,7 +43,7 @@ where
                 Some(d) => {
                     let size_of_next = d.bytes_size();
                     if size_of_next > self.chunk_byte_size {
-                        panic!("'{}' is larger than {} bytes", d, self.chunk_byte_size);
+                        panic!("Chunk is larger than {} bytes", self.chunk_byte_size);
                     } else if byte_count + size_of_next > self.chunk_byte_size {
                         break;
                     } else {
@@ -61,7 +60,7 @@ where
 
 impl<'a, T> Iterator for ByteChunks<'a, T>
 where
-    T: SizeInBytes + Display,
+    T: SizeInBytes,
 {
     type Item = &'a [T];
 
@@ -91,7 +90,7 @@ pub trait SafeByteChunked<'a, T> {
 
 impl<T> ByteChunked<'_, T> for [T]
 where
-    T: SizeInBytes + Display,
+    T: SizeInBytes,
 {
     fn byte_chunks(&self, chunk_byte_size: usize) -> ByteChunks<'_, T> {
         ByteChunks::new(self, chunk_byte_size)
@@ -100,7 +99,7 @@ where
 
 impl<T> ByteChunked<'_, T> for Vec<T>
 where
-    T: SizeInBytes + Display,
+    T: SizeInBytes,
 {
     fn byte_chunks(&self, chunk_byte_size: usize) -> ByteChunks<'_, T> {
         ByteChunks::new(self.as_slice(), chunk_byte_size)
@@ -109,7 +108,7 @@ where
 
 impl<T> SafeByteChunkedMut<'_, T> for Vec<T>
 where
-    T: SizeInBytes + Display,
+    T: SizeInBytes,
 {
     fn byte_chunks_safe_mut(&mut self, chunk_byte_size: usize) -> ByteChunks<'_, T> {
         self.retain(|x| x.bytes_size() <= chunk_byte_size);
